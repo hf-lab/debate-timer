@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debate Timer - British Parliamentary</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0e27;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(99, 102, 241, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .container {
+            background: linear-gradient(135deg, #1e1e2e 0%, #252538 100%);
+            border-radius: 32px;
+            padding: 48px;
+            max-width: 700px;
+            width: 100%;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5),
+                        0 0 0 1px rgba(255, 255, 255, 0.1);
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 48px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 24px;
+            position: relative;
+        }
+
+        h1 {
+            color: #ffffff;
+            font-size: 2.5em;
+            font-weight: 300;
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #a1a1aa;
+            font-size: 0.95em;
+            font-weight: 400;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50px;
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9em;
+            color: #ffffff;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(1.05);
+        }
+
+        /* Light Theme Styles */
+        body.light-theme {
+            background: #f5f5f7;
+        }
+
+        body.light-theme::before {
+            background: radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.08) 0%, transparent 50%);
+        }
+
+        body.light-theme .container {
+            background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15),
+                        0 0 0 1px rgba(0, 0, 0, 0.05);
+        }
+
+        body.light-theme h1 {
+            color: #18181b;
+        }
+
+        body.light-theme .subtitle {
+            color: #71717a;
+        }
+
+        body.light-theme .header {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        body.light-theme .timer-section {
+            background: rgba(0, 0, 0, 0.02);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        body.light-theme .timer-section:hover {
+            background: rgba(0, 0, 0, 0.04);
+            border-color: rgba(0, 0, 0, 0.12);
+        }
+
+        body.light-theme .section-title {
+            color: #71717a;
+        }
+
+        body.light-theme .timer-display {
+            color: #18181b;
+        }
+
+        body.light-theme .round-name {
+            color: #18181b;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        body.light-theme .btn-primary {
+            background: rgba(99, 102, 241, 0.1);
+            color: #4f46e5;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        body.light-theme .btn-primary:hover {
+            background: rgba(99, 102, 241, 0.15);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        body.light-theme .footer {
+            border-top: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        body.light-theme .footer p {
+            color: #71717a;
+        }
+
+        body.light-theme .footer a {
+            color: #4f46e5;
+        }
+
+        body.light-theme .footer a:hover {
+            color: #6366f1;
+        }
+
+        body.light-theme .theme-toggle {
+            background: rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            color: #18181b;
+        }
+
+        body.light-theme .theme-toggle:hover {
+            background: rgba(0, 0, 0, 0.08);
+        }
+
+        .timer-section {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            padding: 40px;
+            margin-bottom: 24px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .timer-section:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .section-title {
+            font-size: 0.875em;
+            margin-bottom: 24px;
+            font-weight: 500;
+            text-align: center;
+            color: #a1a1aa;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .timer-display {
+            font-size: 5.5em;
+            font-weight: 200;
+            text-align: center;
+            margin: 32px 0;
+            font-variant-numeric: tabular-nums;
+            color: #ffffff;
+            letter-spacing: -0.02em;
+            line-height: 1;
+        }
+
+        .round-name {
+            font-size: 1.5em;
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: 400;
+            color: #ffffff;
+            padding: 16px;
+            background: rgba(99, 102, 241, 0.15);
+            border-radius: 12px;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 24px;
+        }
+
+        button {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.95em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: 0.01em;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.1);
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        button:hover::before {
+            opacity: 1;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary {
+            background: rgba(99, 102, 241, 0.2);
+            color: #a5b4fc;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: rgba(99, 102, 241, 0.3);
+            border-color: rgba(99, 102, 241, 0.5);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-bell {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            width: 100%;
+            font-size: 1.05em;
+            padding: 18px;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            margin-top: 8px;
+        }
+
+        .overtime-label {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            padding: 16px 24px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-top: 20px;
+            animation: pulse 1.5s ease-in-out infinite;
+            border: 1px solid rgba(239, 68, 68, 0.5);
+            color: white;
+            letter-spacing: 0.05em;
+        }
+
+        @keyframes pulse {
+            0%, 100% { 
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% { 
+                opacity: 0.85;
+                transform: scale(0.99);
+            }
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 24px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer p {
+            color: #71717a;
+            font-size: 0.875em;
+            font-weight: 400;
+        }
+
+        .footer a {
+            color: #a5b4fc;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .footer a:hover {
+            color: #c7d2fe;
+        }
+
+        .icon {
+            font-style: normal;
+            font-size: 1.1em;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 32px 24px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .timer-display {
+                font-size: 4em;
+            }
+
+            .timer-section {
+                padding: 32px 24px;
+            }
+
+            button {
+                padding: 12px 20px;
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <button class="theme-toggle" id="themeToggle">
+                <span id="themeIcon">☀️</span>
+                <span id="themeText">Light</span>
+            </button>
+            <h1>Debate Timer</h1>
+            <p class="subtitle">British Parliamentary Format</p>
+        </div>
+        
+        <!-- Preparation Timer -->
+        <div class="timer-section">
+            <div class="section-title">Preparation Time</div>
+            <div class="timer-display" id="prepClock">15:00</div>
+            <div class="button-group">
+                <button class="btn-success" id="prepStartBtn">
+                    <span class="icon" id="prepIcon">▶</span>
+                    <span>Play</span>
+                </button>
+                <button class="btn-danger" id="prepResetBtn">
+                    <span class="icon">↻</span>
+                    <span>Reset</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Debate Timer -->
+        <div class="timer-section">
+            <div class="section-title">Speaking Time</div>
+            <div class="round-name" id="roundName">Prime Minister</div>
+            <div class="timer-display" id="clock">0:00</div>
+            <div id="overtimeWrapper" style="display: none;">
+                <div class="overtime-label">OVERTIME</div>
+            </div>
+            <div class="button-group">
+                <button class="btn-primary" id="prevBtn">
+                    <span class="icon">←</span>
+                    <span>Previous</span>
+                </button>
+                <button class="btn-success" id="startBtn">
+                    <span class="icon" id="startIcon">▶</span>
+                    <span id="startText">Start</span>
+                </button>
+                <button class="btn-danger" id="resetBtn">
+                    <span class="icon">↻</span>
+                    <span>Reset</span>
+                </button>
+                <button class="btn-primary" id="nextBtn">
+                    <span>Next</span>
+                    <span class="icon">→</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Bell Button -->
+        <button class="btn-bell" id="bellBtn">
+            <span class="icon">🔔</span>
+            <span>Ring Bell</span>
+        </button>
+
+        <div class="footer">
+            <p>Developed by <a href="https://instagram.com/hamzah.hf/" target="_blank">HMZH</a></p>
+        </div>
+    </div>
+
+    <script>
+        // Debate rounds configuration
+        const rounds = [
+            { name: "Prime Minister", time: 420 },
+            { name: "Leader of Opposition", time: 420 },
+            { name: "Deputy Prime Minister", time: 420 },
+            { name: "Deputy Leader of Opposition", time: 420 },
+            { name: "Member of Government", time: 420 },
+            { name: "Member of Opposition", time: 420 },
+            { name: "Government Whip", time: 420 },
+            { name: "Opposition Whip", time: 420 }
+        ];
+
+        let currentRound = 0;
+        let debateTime = 0;
+        let prepTime = 900;
+        let debateInterval = null;
+        let prepInterval = null;
+        let isDebateRunning = false;
+        let isPrepRunning = false;
+
+        function formatTime(seconds) {
+            const mins = Math.floor(Math.abs(seconds) / 60);
+            const secs = Math.abs(seconds) % 60;
+            const sign = seconds < 0 ? '-' : '';
+            return `${sign}${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function updateDebateClock() {
+            document.getElementById('clock').textContent = formatTime(debateTime);
+            if (debateTime > rounds[currentRound].time) {
+                document.getElementById('overtimeWrapper').style.display = 'block';
+            } else {
+                document.getElementById('overtimeWrapper').style.display = 'none';
+            }
+        }
+
+        function updatePrepClock() {
+            document.getElementById('prepClock').textContent = formatTime(prepTime);
+        }
+
+        function toggleDebateTimer() {
+            if (isDebateRunning) {
+                clearInterval(debateInterval);
+                document.getElementById('startIcon').textContent = '▶';
+                document.getElementById('startText').textContent = 'Start';
+            } else {
+                debateInterval = setInterval(() => {
+                    debateTime++;
+                    updateDebateClock();
+                }, 1000);
+                document.getElementById('startIcon').textContent = '⏸';
+                document.getElementById('startText').textContent = 'Pause';
+            }
+            isDebateRunning = !isDebateRunning;
+        }
+
+        function resetDebateTimer() {
+            clearInterval(debateInterval);
+            isDebateRunning = false;
+            debateTime = 0;
+            updateDebateClock();
+            document.getElementById('startIcon').textContent = '▶';
+            document.getElementById('startText').textContent = 'Start';
+        }
+
+        function nextRound() {
+            resetDebateTimer();
+            currentRound = (currentRound + 1) % rounds.length;
+            document.getElementById('roundName').textContent = rounds[currentRound].name;
+        }
+
+        function prevRound() {
+            resetDebateTimer();
+            currentRound = (currentRound - 1 + rounds.length) % rounds.length;
+            document.getElementById('roundName').textContent = rounds[currentRound].name;
+        }
+
+        function togglePrepTimer() {
+            if (isPrepRunning) {
+                clearInterval(prepInterval);
+                document.getElementById('prepIcon').textContent = '▶';
+                document.getElementById('prepStartBtn').querySelector('span:last-child').textContent = 'Play';
+            } else {
+                prepInterval = setInterval(() => {
+                    prepTime--;
+                    updatePrepClock();
+                    if (prepTime <= 0) {
+                        clearInterval(prepInterval);
+                        isPrepRunning = false;
+                        playBell();
+                    }
+                }, 1000);
+                document.getElementById('prepIcon').textContent = '⏸';
+                document.getElementById('prepStartBtn').querySelector('span:last-child').textContent = 'Pause';
+            }
+            isPrepRunning = !isPrepRunning;
+        }
+
+        function resetPrepTimer() {
+            clearInterval(prepInterval);
+            isPrepRunning = false;
+            prepTime = 900;
+            updatePrepClock();
+            document.getElementById('prepIcon').textContent = '▶';
+            document.getElementById('prepStartBtn').querySelector('span:last-child').textContent = 'Play';
+        }
+
+        function playBell() {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = 800;
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.5);
+        }
+
+        document.getElementById('startBtn').addEventListener('click', toggleDebateTimer);
+        document.getElementById('resetBtn').addEventListener('click', resetDebateTimer);
+        document.getElementById('nextBtn').addEventListener('click', nextRound);
+        document.getElementById('prevBtn').addEventListener('click', prevRound);
+        document.getElementById('prepStartBtn').addEventListener('click', togglePrepTimer);
+        document.getElementById('prepResetBtn').addEventListener('click', resetPrepTimer);
+        document.getElementById('bellBtn').addEventListener('click', playBell);
+
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const themeText = document.getElementById('themeText');
+        
+        // Check for saved theme preference or default to 'dark'
+        const currentTheme = localStorage.getItem('theme') || 'dark';
+        if (currentTheme === 'light') {
+            document.body.classList.add('light-theme');
+            themeIcon.textContent = '🌙';
+            themeText.textContent = 'Dark';
+        }
+
+        themeToggle.addEventListener('click', function() {
+            document.body.classList.toggle('light-theme');
+            
+            if (document.body.classList.contains('light-theme')) {
+                themeIcon.textContent = '🌙';
+                themeText.textContent = 'Dark';
+                localStorage.setItem('theme', 'light');
+            } else {
+                themeIcon.textContent = '☀️';
+                themeText.textContent = 'Light';
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+
+        updateDebateClock();
+        updatePrepClock();
+    </script>
+</body>
+</html>
